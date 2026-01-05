@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
+import { TodosModule } from './todos/todos.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { UserModule } from './user/user.module';
       charset: 'utf8mb4', // 支持 emoji 表情的编码格式
     }),
     // 后续可注册 UserModule：TypeOrmModule.forFeature([User])
-    UserModule
+    UserModule,
+    TodosModule
   ],
   controllers: [AppController],
   providers: [AppService],

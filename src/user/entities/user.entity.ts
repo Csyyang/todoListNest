@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Todo } from 'src/todos/entities/todo.entity';
 
 @Entity('users') // 显式指定数据表名（可选，默认是 user 复数 users）
 export class User {
@@ -80,4 +81,8 @@ export class User {
         comment: '软删除标记，0=未删除，1=已删除'
     })
     isDeleted: number;
+
+
+    @OneToMany(() => Todo, (todo) => todo.user)
+    todos: Todo[];
 }
