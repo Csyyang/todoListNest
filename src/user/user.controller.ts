@@ -31,6 +31,7 @@ export class UserController {
    */
   @Post('login') // 路由后缀：login，完整接口路径 /users/login
   async login(@Body() loginUserDto: LoginUserDto) {
+    console.log(loginUserDto)
     const result = await this.userService.login(loginUserDto);
     return {
       code: 200,

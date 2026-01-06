@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { TodosModule } from './todos/todos.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { TodosModule } from './todos/todos.module';
     }),
     // 后续可注册 UserModule：TypeOrmModule.forFeature([User])
     UserModule,
-    TodosModule
+    TodosModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

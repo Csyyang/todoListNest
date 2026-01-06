@@ -2,10 +2,12 @@ import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport'; // JWT 登录守卫（与你的登录逻辑一致）
 import { TodoService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
+import { DelTodoDto } from './dto/del-todo.dto';
+import { ComplentToDoList } from './dto/todo.dto';
 
 @Controller('todos') // 接口前缀：/todos
 export class TodoController {
-  constructor(private readonly todoService: TodoService) {}
+  constructor(private readonly todoService: TodoService) { }
 
   /**
    * 创建当日待办任务接口
@@ -20,7 +22,40 @@ export class TodoController {
     @Body() createTodoDto: CreateTodoDto,
   ) {
     // 从 JWT 解析的用户信息中获取 userId（与你登录时生成的 JWT payload 一致）
-    const userId = req.user.userId; 
+    const userId = req.user.userId;
     return this.todoService.createTodayTodo(userId, createTodoDto);
+  }
+
+  @Post('getToDayToDo')
+  @UseGuards(AuthGuard('jwt'))
+  async getToDayToDo(
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+
+    return this.todoService.getTodayTodoList(userId)
+  }
+
+  @Post('delToDolist')
+  @UseGuards(AuthGuard('jwt'))
+  async delToDolist(
+    @Request() req,
+    @Body() delTodoDto: DelTodoDto
+  ) {
+    const userId = req.user.userId;
+
+    return this.todoService.softDeleteTodo(delTodoDto, userId)
+  }
+
+
+  @Post('completeToDoList')
+  @UseGuards(AuthGuard('jwt'))
+  async complentToDoList(
+    @Request() req,
+    @Body() delTodoDto: ComplentToDoList
+  ) {
+    const userId = req.user.userId;
+
+    return this.todoService.completeTodo(delTodoDto, userId)
   }
 }
