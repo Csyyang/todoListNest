@@ -1,11 +1,11 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto'; 
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Controller('users') // 接口前缀：/api/users（若全局配置了 /api 前缀）
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   /**
    * 新增用户接口（注册接口）
@@ -31,7 +31,7 @@ export class UserController {
    */
   @Post('login') // 路由后缀：login，完整接口路径 /users/login
   async login(@Body() loginUserDto: LoginUserDto) {
-    console.log(loginUserDto)
+    console.log(loginUserDto);
     const result = await this.userService.login(loginUserDto);
     return {
       code: 200,

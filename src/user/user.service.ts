@@ -62,7 +62,10 @@ export class UserService {
       where: { phone, isDeleted: 0 },
     });
     if (!user) {
-      throw new HttpException('手机号未注册或用户已删除', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '手机号未注册或用户已删除',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     // 2. 密码比对（原有逻辑不变）
     const isPasswordMatch = await bcrypt.compare(password, user.password);

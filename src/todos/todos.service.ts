@@ -12,7 +12,7 @@ export class TodoService {
   constructor(
     @InjectRepository(Todo)
     private readonly todoRepository: Repository<Todo>,
-  ) { }
+  ) {}
 
   /**
    * 创建当日待办任务
@@ -39,7 +39,10 @@ export class TodoService {
     const savedTodo = await this.todoRepository.save(todo);
 
     if (!savedTodo) {
-      throw new HttpException('创建当日任务失败', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        '创建当日任务失败',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     // 3. 返回创建成功的任务信息（可按需过滤字段）
@@ -63,18 +66,28 @@ export class TodoService {
     try {
       // 1. 计算当日时间范围（UTC 时间适配数据库的 datetime 字段）
       const today = new Date();
-      const startOfDay = new Date(Date.UTC(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        0, 0, 0, 0 // 当日 00:00:00 UTC
-      ));
-      const endOfDay = new Date(Date.UTC(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        23, 59, 59, 999 // 当日 23:59:59 UTC
-      ));
+      const startOfDay = new Date(
+        Date.UTC(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          0,
+          0,
+          0,
+          0, // 当日 00:00:00 UTC
+        ),
+      );
+      const endOfDay = new Date(
+        Date.UTC(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          23,
+          59,
+          59,
+          999, // 当日 23:59:59 UTC
+        ),
+      );
 
       // 2. 查询当日待办（完全匹配实体字段）
       const todoList = await this.todoRepository.find({
@@ -95,7 +108,7 @@ export class TodoService {
         // },
       });
 
-      return todoList.map(todo => this.formatTodoResponse(todo));
+      return todoList.map((todo) => this.formatTodoResponse(todo));
     } catch (error) {
       throw new HttpException(
         `获取当日待办列表失败：${error.message}`,
@@ -104,16 +117,14 @@ export class TodoService {
     }
   }
 
-
-
   /**
-  * 软删除待办任务（核心新增方法）
-  * @param todoId 要删除的任务ID
-  * @param userId 当前登录用户ID（确保只能删除自己的任务）
-  * @returns 软删除操作结果
-  */
+   * 软删除待办任务（核心新增方法）
+   * @param todoId 要删除的任务ID
+   * @param userId 当前登录用户ID（确保只能删除自己的任务）
+   * @returns 软删除操作结果
+   */
   async softDeleteTodo(delTodoDto: DelTodoDto, userId: number) {
-    const { id: todoId } = delTodoDto
+    const { id: todoId } = delTodoDto;
     try {
       // 2. 查询目标任务：校验是否存在、是否归属当前用户、是否已被删除
       const targetTodo = await this.todoRepository.findOne({
@@ -125,21 +136,30 @@ export class TodoService {
 
       // 3. 业务规则校验
       if (!targetTodo) {
-        throw new HttpException('未找到该任务（或该任务不属于当前用户）', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          '未找到该任务（或该任务不属于当前用户）',
+          HttpStatus.NOT_FOUND,
+        );
       }
       if (targetTodo.isDeleted === 1) {
-        throw new HttpException('该任务已被删除，无需重复操作', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '该任务已被删除，无需重复操作',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 4. 执行软删除更新：仅修改isDeleted和updateTime（updateTime会自动更新）
       const updateResult: UpdateResult = await this.todoRepository.update(
         { id: todoId, userId: userId }, // 双重条件：确保更新的是目标任务+当前用户的任务
-        { isDeleted: 1 } // 软删除标记置为1
+        { isDeleted: 1 }, // 软删除标记置为1
       );
 
       // 5. 校验更新结果
       if (updateResult.affected === 0) {
-        throw new HttpException('软删除任务失败', HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException(
+          '软删除任务失败',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
 
       // 6. 返回操作结果（可按需返回任务信息）
@@ -157,7 +177,7 @@ export class TodoService {
       }
       throw new HttpException(
         `软删除任务失败：${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -169,7 +189,7 @@ export class TodoService {
    * @returns 完成操作结果
    */
   async completeTodo(complentToDoList: ComplentToDoList, userId: number) {
-    const { id: todoId } = complentToDoList
+    const { id: todoId } = complentToDoList;
 
     try {
       // 2. 查询目标任务：校验存在性、归属、未删除
@@ -183,10 +203,16 @@ export class TodoService {
 
       // 3. 业务规则校验
       if (!targetTodo) {
-        throw new HttpException('未找到该任务（或该任务不属于当前用户/已被删除）', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          '未找到该任务（或该任务不属于当前用户/已被删除）',
+          HttpStatus.NOT_FOUND,
+        );
       }
       if (targetTodo.status === 1) {
-        throw new HttpException('该任务已完成，无需重复操作', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '该任务已完成，无需重复操作',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 4. 执行完成操作：更新状态+完成时间（updateTime自动更新）
@@ -195,12 +221,15 @@ export class TodoService {
         {
           status: 1, // 标记为已完成（匹配实体定义：1=已完成）
           finishTime: new Date(), // 填充完成时间为当前时间（UTC时间，适配实体datetime类型）
-        }
+        },
       );
 
       // 5. 校验更新结果
       if (updateResult.affected === 0) {
-        throw new HttpException('标记任务为已完成失败', HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException(
+          '标记任务为已完成失败',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
 
       // 6. 返回更新后的任务信息
@@ -224,11 +253,10 @@ export class TodoService {
       }
       throw new HttpException(
         `标记任务完成失败：${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
 
   /**
    * 统一格式化响应（严格匹配实体字段）
@@ -242,7 +270,7 @@ export class TodoService {
       createTime: todo.createTime,
       updateTime: todo.updateTime,
       finishTime: todo.finishTime,
-      isDeleted: todo.isDeleted, // 可选返回，根据业务需求决定
+      // isDeleted: todo.isDeleted, // 可选返回，根据业务需求决定
       // 若开启了 relations: ['user']，可补充用户信息：
       // userName: todo.user?.username,
       // userPhone: todo.user?.phone,

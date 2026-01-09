@@ -18,44 +18,71 @@ export class TodoController {
   @Post('today') // 接口路径：/todos/today
   @UseGuards(AuthGuard('jwt')) // 替换为你的 JWT 守卫策略名称（默认通常是 'jwt'）
   async createTodayTodo(
-    @Request() req, // 获取请求对象
+    @Request() req: { user: { userId: number } }, // 获取请求对象
     @Body() createTodoDto: CreateTodoDto,
   ) {
     // 从 JWT 解析的用户信息中获取 userId（与你登录时生成的 JWT payload 一致）
     const userId = req.user.userId;
-    return this.todoService.createTodayTodo(userId, createTodoDto);
+    const data = await this.todoService.createTodayTodo(userId, createTodoDto);
+    return {
+      code: 200,
+      message: '登录成功',
+      data,
+    };
   }
 
+  /**
+   * 获取当日待办任务列表接口
+   * @param req 
+   * @returns 
+   */
   @Post('getToDayToDo')
   @UseGuards(AuthGuard('jwt'))
-  async getToDayToDo(
-    @Request() req,
-  ) {
+  async getToDayToDo(@Request() req: { user: { userId: number } }) {
     const userId = req.user.userId;
-
-    return this.todoService.getTodayTodoList(userId)
+    const data = await this.todoService.getTodayTodoList(userId);
+    return {
+      code: 200,
+      message: '登录成功',
+      data,
+    };
   }
 
+  /**
+   * 删除当日待办任务接口
+   * @param req 
+   * @param delTodoDto 
+   * @returns 
+   */
   @Post('delToDolist')
   @UseGuards(AuthGuard('jwt'))
   async delToDolist(
-    @Request() req,
-    @Body() delTodoDto: DelTodoDto
+    @Request() req: { user: { userId: number } },
+    @Body() delTodoDto: DelTodoDto,
   ) {
     const userId = req.user.userId;
-
-    return this.todoService.softDeleteTodo(delTodoDto, userId)
+    const data = this.todoService.softDeleteTodo(delTodoDto, userId);
+    return {
+      code: 200,
+      message: '登录成功',
+      data,
+    };
   }
-
 
   @Post('completeToDoList')
   @UseGuards(AuthGuard('jwt'))
   async complentToDoList(
-    @Request() req,
-    @Body() delTodoDto: ComplentToDoList
+    @Request() req: { user: { userId: number } },
+    @Body() delTodoDto: ComplentToDoList,
   ) {
     const userId = req.user.userId;
 
-    return this.todoService.completeTodo(delTodoDto, userId)
+    const data = await this.todoService.completeTodo(delTodoDto, userId);
+
+    return {
+      code: 200,
+      message: '登录成功',
+      data,
+    };
   }
 }
