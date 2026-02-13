@@ -4,7 +4,7 @@ import { Repository, Between, UpdateResult } from 'typeorm';
 import { Todo } from './entities/todo.entity';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { DelTodoDto } from './dto/del-todo.dto';
-import { ComplentToDoList } from './dto/todo.dto';
+import { ComplentToDoList, SearchBymonthTodoList } from './dto/todo.dto';
 
 @Injectable()
 export class TodoService {
@@ -12,7 +12,7 @@ export class TodoService {
   constructor(
     @InjectRepository(Todo)
     private readonly todoRepository: Repository<Todo>,
-  ) {}
+  ) { }
 
   /**
    * 创建当日待办任务
@@ -256,6 +256,84 @@ export class TodoService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+
+  async getDetailByMonth(SearchBymonth: SearchBymonthTodoList, userId: number) {
+    const { year, month, type } = SearchBymonth
+    const { start, end } = this.getMonthTimeRange(year, month);
+
+    const whereConditions: any = {
+      userId,
+      isDeleted: 0, // 排除软删除的任务
+      createTime: Between(start, end), // 筛选当月创建的任务（若要按完成时间筛选，替换为 finishTime）
+    };
+
+    // 可选筛选任务状态
+    if (type !== undefined) {
+      whereConditions.status = type;
+    }
+
+
+    return this.todoRepository.find({
+      where: whereConditions,
+      order: {
+        createTime: 'DESC'
+      }
+    })
+  }
+
+  /**
+   * 统计指定用户某个月份的完成/未完成任务数量
+   * @param userId 用户ID
+   * @param year 年份
+   * @param month 月份（1-12）
+   * @returns 包含完成/未完成数量的统计结果
+   */
+  async countUserTodosByMonth(
+    userId: number,
+    year: number,
+    month: number,
+  ): Promise<{ completed: number; uncompleted: number }> {
+    const { start, end } = this.getMonthTimeRange(year, month);
+
+    // 统计已完成任务（status=1）
+    const completed = await this.todoRepository.count({
+      where: {
+        userId,
+        isDeleted: 0,
+        status: 1,
+        createTime: Between(start, end),
+      },
+    });
+
+    // 统计未完成任务（status=0）
+    const uncompleted = await this.todoRepository.count({
+      where: {
+        userId,
+        isDeleted: 0,
+        status: 0,
+        createTime: Between(start, end),
+      },
+    });
+
+    return { completed, uncompleted };
+  }
+
+
+  /**
+   * 辅助方法：根据年份和月份生成时间范围（当月第一天 00:00 至最后一天 23:59:59）
+   * @param year 年份（如 2024）
+   * @param month 月份（1-12）
+   * @returns 包含 start 和 end 的时间范围对象
+   */
+  private getMonthTimeRange(year: number, month: number): { start: Date; end: Date } {
+    // 当月第一天 00:00:00
+    const start = new Date(year, month - 1, 1, 0, 0, 0);
+    // 下月第一天 00:00:00 - 1 毫秒 = 当月最后一天 23:59:59.999
+    const end = new Date(year, month, 1, 0, 0, 0);
+    end.setMilliseconds(end.getMilliseconds() - 1);
+    return { start, end };
   }
 
   /**

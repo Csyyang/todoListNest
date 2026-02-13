@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport'; // JWT 登录守卫（与你的登
 import { TodoService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { DelTodoDto } from './dto/del-todo.dto';
-import { ComplentToDoList } from './dto/todo.dto';
+import { ComplentToDoList, SearchBymonthTodoList } from './dto/todo.dto';
 
 @Controller('todos') // 接口前缀：/todos
 export class TodoController {
@@ -81,7 +81,43 @@ export class TodoController {
 
     return {
       code: 200,
-      message: '登录成功',
+      message: '操作成功',
+      data,
+    };
+  }
+
+  /** 根据年月获取任务详情 */
+  @Post('getDetailByMonth')
+  @UseGuards(AuthGuard('jwt'))
+  async getDetailByMonth(
+    @Request() req: { user: { userId: number } },
+    @Body() searchDate: SearchBymonthTodoList
+  ) {
+    const userId = req.user.userId;
+
+    const data = await this.todoService.getDetailByMonth(searchDate, userId);
+    console.log(data)
+    return {
+      code: 200,
+      message: '操作成功',
+      data,
+    };
+  }
+
+
+  @Post('countUserTodosByMonth')
+  @UseGuards(AuthGuard('jwt'))
+  async countUserTodosByMonth(
+    @Request() req: { user: { userId: number } },
+    @Body() searchDate: SearchBymonthTodoList
+  ) {
+    const userId = req.user.userId;
+
+    const data = await this.todoService.countUserTodosByMonth(userId, searchDate.year, searchDate.month);
+    console.log(data)
+    return {
+      code: 200,
+      message: '操作成功',
       data,
     };
   }

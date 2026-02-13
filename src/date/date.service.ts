@@ -21,10 +21,14 @@ export class DateService {
 
     const currentWeekday = now.getDay()
     const currentDate = now.getDate();
+    const mounth = now.getMonth() + 1; // 月份从0开始，需要加1
 
     return {
+      year: now.getFullYear(),
       weekday: currentWeekday,
-      date: currentDate
+      date: currentDate,
+      mounth,
+      time: now.getTime()
     };
   }
 }
