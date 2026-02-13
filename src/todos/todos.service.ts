@@ -52,6 +52,7 @@ export class TodoService {
     }
 
     // 3. 返回创建成功的任务信息（可按需过滤字段）
+    console.log('1111', savedTodo.finishTime)
     return {
       id: savedTodo.id,
       content: savedTodo.content,
@@ -281,12 +282,14 @@ export class TodoService {
     }
 
 
-    return this.todoRepository.find({
+    const todoList = await this.todoRepository.find({
       where: whereConditions,
       order: {
         createTime: 'DESC'
       }
     })
+
+    return todoList.map((todo) => this.formatTodoResponse(todo));
   }
 
   /**
