@@ -106,4 +106,15 @@ export class Todo {
         comment: '任务状态，0=未完成，1=已完成'
     })
     status: number;
+
+    /**
+     * 任务截止日期，必填字段
+     */
+    @Column({
+        type: 'datetime',
+        name: 'deadline',
+        nullable: false, // 设置为必填（不可为 null）
+        comment: '任务截止日期，必填'
+    })
+    deadline: Date;
 }

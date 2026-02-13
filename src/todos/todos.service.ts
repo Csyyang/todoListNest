@@ -21,18 +21,24 @@ export class TodoService {
    * @returns 创建成功的任务信息
    */
   async createTodayTodo(userId: number, createTodoDto: CreateTodoDto) {
-    const { content } = createTodoDto;
+    const { content, deadline } = createTodoDto;
+    const now = new Date();
+    const deadlineTime = new Date(deadline);
+    // 截止日期必须晚于当前时间至少1分钟（60000 毫秒）
+    const minTime = new Date(now.getTime() + 60000);
+    if (deadlineTime < minTime) {
+      deadlineTime >= minTime
+      throw new HttpException(
+        '截止日期必须晚于当前时间',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     // 1. 实例化 Todo 实体（自动填充 createTime/updateTime，无需手动赋值）
     const todo = this.todoRepository.create({
       userId, // 关联当前登录用户（从 JWT 中获取，确保任务归属正确）
       content, // 任务内容
-      // 以下字段无需手动赋值，使用默认值或自动填充
-      // isDeleted: 0（默认值）
-      // status: 0（默认值，未完成）
-      // finishTime: null（默认值，未完成）
-      // createTime: 自动填充当前时间（当日时间，即当日任务）
-      // updateTime: 自动填充当前时间
+      deadline: new Date(deadline)
     });
 
     // 2. 保存任务到数据库
@@ -348,6 +354,7 @@ export class TodoService {
       createTime: todo.createTime,
       updateTime: todo.updateTime,
       finishTime: todo.finishTime,
+      deadline: todo.deadline
       // isDeleted: todo.isDeleted, // 可选返回，根据业务需求决定
       // 若开启了 relations: ['user']，可补充用户信息：
       // userName: todo.user?.username,

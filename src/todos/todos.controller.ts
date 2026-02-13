@@ -112,7 +112,6 @@ export class TodoController {
     @Body() searchDate: SearchBymonthTodoList
   ) {
     const userId = req.user.userId;
-
     const data = await this.todoService.countUserTodosByMonth(userId, searchDate.year, searchDate.month);
     console.log(data)
     return {
