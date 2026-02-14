@@ -102,7 +102,7 @@ export class TodoService {
           status: 0,
           userId, // 匹配实体的 userId 物理字段
           isDeleted: 0, // 匹配实体的软删除标记
-          createTime: Between(startOfDay, endOfDay), // 匹配实体的 createTime 字段
+          // createTime: Between(startOfDay, endOfDay), // 匹配实体的 createTime 字段
         },
         order: {
           createTime: 'DESC', // 按创建时间降序
@@ -114,6 +114,7 @@ export class TodoService {
         //   user: { id: true, phone: true, username: true },
         // },
       });
+      
 
       return todoList.map((todo) => this.formatTodoResponse(todo));
     } catch (error) {
