@@ -2,7 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository, LessThanOrEqual } from 'typeorm';
 import { Todo } from 'src/todos/entities/todo.entity';
 // 替换为 EmailPushService
 import { EmailPushService } from 'src/email-push/email-push.service';
@@ -16,7 +16,7 @@ export class TaskCheckerService {
     private readonly todoRepo: Repository<Todo>,
     // 注入邮件推送服务
     private readonly emailPushService: EmailPushService,
-  ) {}
+  ) { }
 
   /**
    * 定时检测超时任务（每分钟执行一次）
@@ -28,15 +28,16 @@ export class TaskCheckerService {
   async checkTimeoutTasks() {
     this.logger.log('========== 开始检测超时任务 ==========');
     const now = new Date();
+    now.setHours(now.getHours() + 2); // 加2小时
 
     try {
-      // 查询超时任务（原有逻辑不变）
+      // 查询超时任务
       const timeoutTasks = await this.todoRepo.find({
         where: {
           status: 0,
           isNotified: 0,
           isDeleted: 0,
-          deadline: LessThan(now),
+          deadline: LessThanOrEqual(now),
         },
       });
 

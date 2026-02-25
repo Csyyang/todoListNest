@@ -18,7 +18,6 @@ export interface EmailMessageDto {
 
 // 用户邮件配置 DTO
 export interface EmailConfigDto {
-  userId: number;
   email: string;
   isEnabled?: number;
 }
@@ -80,11 +79,11 @@ export class EmailPushService {
   /**
    * 添加/更新用户邮件配置
    */
-  async saveEmailConfig(configDto: EmailConfigDto): Promise<EmailPushConfig> {
+  async saveEmailConfig(configDto: EmailConfigDto, userId: number): Promise<EmailPushConfig> {
     try {
       // 先查询用户是否已有配置
       let config = await this.emailConfigRepo.findOne({
-        where: { userId: configDto.userId, isDeleted: 0 },
+        where: { userId: userId, isDeleted: 0 },
       });
 
       if (config) {
@@ -94,7 +93,7 @@ export class EmailPushService {
       } else {
         // 创建新配置
         config = this.emailConfigRepo.create({
-          userId: configDto.userId,
+          userId: userId,
           email: configDto.email,
           isEnabled: configDto.isEnabled ?? 1,
           isDeleted: 0,
@@ -102,7 +101,7 @@ export class EmailPushService {
       }
 
       const savedConfig = await this.emailConfigRepo.save(config);
-      this.logger.log(`用户 ${configDto.userId} 邮件配置保存成功，邮箱：${configDto.email}`);
+      this.logger.log(`用户 ${userId} 邮件配置保存成功，邮箱：${configDto.email}`);
       return savedConfig;
     } catch (error) {
       this.logger.error(`保存邮件配置失败：${error.message}`, error.stack);
