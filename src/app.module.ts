@@ -6,7 +6,10 @@ import { UserModule } from './user/user.module';
 import { TodosModule } from './todos/todos.module';
 import { AuthModule } from './auth/auth.module';
 import { DateModule } from './date/date.module';
-
+import { ConfigModule } from '@nestjs/config';
+import { WebPushModule } from './web-push/web-push.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TaskCheckerModule } from './task-checker/task-checker.module';
 @Module({
   imports: [
     // 配置 TypeORM 连接 MySQL
@@ -26,7 +29,14 @@ import { DateModule } from './date/date.module';
     UserModule,
     TodosModule,
     AuthModule,
-    DateModule
+    DateModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    WebPushModule,
+    // 启用定时任务（检测超时任务）
+    ScheduleModule.forRoot(),
+    TaskCheckerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

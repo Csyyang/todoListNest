@@ -117,4 +117,17 @@ export class Todo {
         comment: '任务截止日期，必填'
     })
     deadline: Date;
+
+    /**
+    * 超时通知标记（新增字段）
+    * 0：未通知，1：已通知（避免重复推送）
+    */
+    @Column({
+        type: 'tinyint',
+        name: 'is_notified',
+        nullable: false,
+        default: 0,
+        comment: '超时通知标记，0=未通知，1=已通知',
+    })
+    isNotified: number;
 }
