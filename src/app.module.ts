@@ -11,6 +11,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskCheckerModule } from './task-checker/task-checker.module';
 import { EmailPushModule } from './email-push/email-push.module';
+import { ThirdApiModule } from './third-api/third-api.module';
 @Module({
   imports: [
     // 配置 TypeORM 连接 MySQL
@@ -39,6 +40,7 @@ import { EmailPushModule } from './email-push/email-push.module';
     ScheduleModule.forRoot(),
     TaskCheckerModule,
     EmailPushModule,
+    ThirdApiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
